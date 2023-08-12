@@ -1,0 +1,32 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.Sherlarsms" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.Sherlarsms" parent="Base.Theme.Sherlarsms" />
+    <style name="shade">
+        <item name="android:outlineAmbientShadowColor" >#F8C500</item>
+        <item name="android:outlineSpotShadowColor" >#F8C500</item>
+        <item name="android:spotShadowAlpha">1</item>
+        <item name="android:ambientShadowAlpha">1</item>
+    </style>
+
+    <style name="shade2">
+        <item name="android:outlineAmbientShadowColor" >#EA1655</item>
+        <item name="android:outlineSpotShadowColor" >#EA1655</item>
+        <item name="android:spotShadowAlpha">1</item>
+        <item name="android:ambientShadowAlpha">1</item>
+    </style>
+
+    <style name="arrow">
+        <item name="cornerSize">20%</item>
+    </style>
+    <style name="dialog_background">
+        <item name="android:clickable">true</item>
+        <item name="cornerSize">20%</item>
+        <item name="android:solidColor">@color/white</item>
+        <item name="android:foreground">?attr/selectableItemBackground</item>
+    </style>
+</resources>
