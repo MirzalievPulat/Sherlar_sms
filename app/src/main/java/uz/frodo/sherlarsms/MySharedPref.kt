@@ -35,8 +35,18 @@ object MySharedPref {
             }
         }
     fun addPoem(poem: Poem) {
-        val updatedPoemList = list
+        var updatedPoemList = list
+        println(updatedPoemList.toString())
+        poem.liked = true
         updatedPoemList.add(poem)
+        println(updatedPoemList.toString())
+        list = updatedPoemList
+    }
+    fun removePoem(poem: Poem) {
+        var updatedPoemList = list
+        println(updatedPoemList.map { it.name })
+        updatedPoemList.remove(updatedPoemList.find { it.text == poem.text })
+        println(updatedPoemList.map { it.name })
         list = updatedPoemList
     }
 }

@@ -32,6 +32,7 @@ private const val ARG_PARAM2 = "param2"
  */
 class SecondFragment : Fragment() {
     lateinit var list:ArrayList<Poem>
+    lateinit var adapter: PoemAdapter
     // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
@@ -55,10 +56,6 @@ class SecondFragment : Fragment() {
             "cardNews" -> {
                 loadNews()
                 binding.name.text = "YANGI \nSHE'RLAR"
-            }
-            "cardSaved" -> {
-                loadSaved()
-                binding.name.text = "SAQLANGAN \nSHE'RLAR"
             }
             "cardLove" -> {
                 loadLove()
@@ -86,13 +83,20 @@ class SecondFragment : Fragment() {
             }
         }
 
-        binding.rv.adapter = PoemAdapter(list,object :PoemAdapter.Click{
-            override fun click(position: Int) {
-                val dialog = this@SecondFragment.context?.let { AlertDialog.Builder(it).create()}
+
+        adapter = PoemAdapter(list,object :PoemAdapter.Click{
+            override fun click(poem: Poem) {
+                val dialog = AlertDialog.Builder(requireContext()).create()
                 val custom = DialogBinding.inflate(layoutInflater)
-                custom.nameDialog.text = list[position].name
-                custom.textDialog.text = list[position].text
-                dialog?.setView(custom.root)
+                custom.nameDialog.text = poem.name
+                custom.textDialog.text = poem.text
+
+                val a = MySharedPref.list.any { it.text == poem.text }
+                if (a){
+                    custom.heart.isChecked = true
+                }
+
+                dialog.setView(custom.root)
 
                 custom.smsDialog.setOnClickListener {
                     val intent = Intent(Intent.ACTION_MAIN)
@@ -101,37 +105,37 @@ class SecondFragment : Fragment() {
 
 
                     val clipboardManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Label for Clip", list[position].text)
+                    val clip = ClipData.newPlainText("Label for Clip", poem.text)
                     clipboardManager.setPrimaryClip(clip)
                 }
-                custom.heartDialog.setOnClickListener {
-                    val a = MySharedPref.list.any { it.text == list[position].text }
-                    if (!a){
-                        MySharedPref.addPoem(list[position])
-                        Toast.makeText(requireContext(), "Saved", Toast.LENGTH_SHORT).show()
+                custom.heart.setOnCheckedChangeListener { buttonView, isChecked ->
+                    if (isChecked){
+                        MySharedPref.addPoem(poem)
+                        Toast.makeText(requireContext(), "Liked", Toast.LENGTH_SHORT).show()
                     }else{
-                        Toast.makeText(requireContext(), "Alredy saved", Toast.LENGTH_SHORT).show()
+                        MySharedPref.removePoem(poem)
+                        Toast.makeText(requireContext(), "Unliked", Toast.LENGTH_SHORT).show()
                     }
-
                 }
                 custom.shareDialog.setOnClickListener {
                     val i = Intent(Intent.ACTION_SEND)
                     i.type = "text/plain"
-                    i.putExtra(Intent.EXTRA_TEXT,list[position].text)
+                    i.putExtra(Intent.EXTRA_TEXT,poem.text)
                     startActivity(Intent.createChooser(i,"Share using"))
                 }
                 custom.copyDialog.setOnClickListener {
                     val clipboardManager = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    val clip = ClipData.newPlainText("Label for Clip", list[position].text)
+                    val clip = ClipData.newPlainText("Label for Clip", poem.text)
                     clipboardManager.setPrimaryClip(clip)
                     Toast.makeText(this@SecondFragment.context, "Copied", Toast.LENGTH_SHORT).show()
                 }
-                dialog?.window?.setGravity(Gravity.BOTTOM)
-                dialog?.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-                dialog?.show()
+                dialog.window?.setGravity(Gravity.BOTTOM)
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.show()
             }
 
         })
+        binding.rv.adapter = adapter
 
         binding.arrow.setOnClickListener {
             findNavController().popBackStack()
@@ -150,15 +154,15 @@ class SecondFragment : Fragment() {
                 "Kamtarin bo'l ayol,\n" +
                 "Bir qadam chiqma ostonangdan.\n" +
                 "Erkak zotin bilmaysanda,\n" +
-                "Erib ketar \"Hop\" so'zingdan."))
+                "Erib ketar \"Hop\" so'zingdan.",false))
         list.add(Poem("Nozli qiz","Sizgacha ham quyosh bo'lgan oy bo'lgan\n" +
                 "Sizgacha ham ne-ne ohu kol'z bo'lgan.\n" +
                 "Bino qo'ymang o'zingizga ey, suluv,\n" +
-                "Yalmog'iz ham bir payt sizday qiz bo'lgan"))
+                "Yalmog'iz ham bir payt sizday qiz bo'lgan",false))
         list.add(Poem("Zamonaviy sevgi izhori:","Xayolimdasan uyquga qadar,\n" +
                 "Xayolimdasan uyg'onsam sahar.\n" +
                 "Hatto tushlarimda ko'raman seni\n" +
-                "Shirin tushlarimga qo'shasan zahar!"))
+                "Shirin tushlarimga qo'shasan zahar!",false))
         list.add(
             Poem(
                 "Boylik", "Dunyo ekan....\n" +
@@ -186,7 +190,7 @@ class SecondFragment : Fragment() {
                         "Do'stlar, bu savdo\n" +
                         "Bormi faqat mening boshimda.?\n" +
                         "Kimni etmas bu ko'ngil shaydo,\n" +
-                        "Kim xazil qilmas mening yoshimda. ")
+                        "Kim xazil qilmas mening yoshimda. ",false)
         )
     }
 
@@ -197,7 +201,7 @@ class SecondFragment : Fragment() {
                     "Do'stimga", "Do’stlar yaxshilarni avaylab asrang.\n" +
                             "Salom degan soz’ni salmog’in oqlang.\n" +
                             "O’lganda yuz soat yig’lab turguncha,\n" +
-                            "Uni tirigida bir soat yo’qlang.")
+                            "Uni tirigida bir soat yo’qlang.",false)
                 )
         list.add(Poem("Eslarmikansan","Hayot nogoh sinovga tortsa\n" +
                 "Baxli baxtsiz kunlar boshlansa\n" +
@@ -210,7 +214,7 @@ class SecondFragment : Fragment() {
                 "Jondan aziz sevganing yonigda bulsa\n" +
                 "Shirin farzandlaring jilmayib kulsa\n" +
                 "Kuzlaring baxtdan porlab tursa\n" +
-                "Mendek dusting eslarmikansan."))
+                "Mendek dusting eslarmikansan.",false))
         list.add(Poem("Do'stginam","Yaxshi bo’lib kеtar, yaxshi bo’lib kеtar,\n" +
                 "Bu dardsiz so’zlardan yurak to’lib kеtar.\n" +
                 "Gar do’stim ekansan, bugundan so’zla,\n" +
@@ -226,7 +230,7 @@ class SecondFragment : Fragment() {
                 "Hеch qachon so’zlama yolg’on so’zlardan,\n" +
                 "Bo’lmagin bеgona, yomon do’stlardan.\n" +
                 "Do’st bo’lsang, o’lmasman, umid shamimni,\n" +
-                "Ming birinchi bora yoqmay so’nmasman."))
+                "Ming birinchi bora yoqmay so’nmasman.",false))
     }
 
     private fun loadParents() {
@@ -239,11 +243,11 @@ class SecondFragment : Fragment() {
                 "Imoni sof yuzga kirib yorug‘ yuz,\n" +
                 "To‘ylar ko‘rib yelkasidan tog‘ tushsin.\n" +
                 "Va jismiga so‘nggi safar paytida\n" +
-                "O‘z bolasin qo‘lidan tuproq tushsin…"))
+                "O‘z bolasin qo‘lidan tuproq tushsin…",false))
         list.add(Poem("To'rtlik","Dunyoda eng yakhshi, mehribon ona,\n" +
                 "Bu mening onamdir, biling, yoronlar!\n" +
                 "Ey, o’g’il-qizlarim, bo’ling parvona\n" +
-                "Onamda qolmasin dardu armonlar!"))
+                "Onamda qolmasin dardu armonlar!",false))
         list.add(Poem("SHUHRAT O, ONA…","Ko’z ochib olamga kelgandan beri\n" +
                 "Nelarni ko’rmadi bu boshim mening.\n" +
                 "Ozmi-ko’p tanidim hayotning sirin,\n" +
@@ -257,7 +261,7 @@ class SecondFragment : Fragment() {
                 "O, ona, hech biri emasdur shirin\n" +
                 "«Bolam!» deb bir og’iz aytgan so’zingdan!\n" +
                 "O, ona mehringda quyosh yashirin,\n" +
-                "Ne ajab gul unsa har bir izingda!"))
+                "Ne ajab gul unsa har bir izingda!",false))
 
     }
 
@@ -267,30 +271,30 @@ class SecondFragment : Fragment() {
                         "Siz nurli insonsiz baxtli begumon,\n" +
                         "Bayramla qutlayman bo’ling shodumon,\n" +
                         "Har kuningiz o’tsin bayramday har on!\n" +
-                        "Tug’ilgan kuningiz muborak bo’lsin!"))
+                        "Tug’ilgan kuningiz muborak bo’lsin!",false))
         list.add(Poem("Sizdek insonlarni ko’proq yaratsin!","Tilaklar ichida izlab topganim,\n" +
                 "Alloh nigohini sizga qaratsin.\n" +
                 "Yagona o’tinchim Allohdan bu kun,\n" +
                 "Sizdek insonlarni ko’proq yaratsin!\n" +
                 "Tavallud ayyomingiz qutlug’ bo’lsin!\n" +
-                "\n"))
+                "\n",false))
         list.add(Poem("Eng shirin orzularni tilayman sizga","Muborak ayyomning tiniq tongiday,\n" +
                 "Musaffo ranglarga to’lganda borliq.\n" +
                 "Xushbo’y tabiatning yetti rangiday,\n" +
                 "Osmon gardishida qolganda yorliq.\n" +
                 "Eng porloq tuyg’ularni tilayman sizga,\n" +
                 "Eng shirin orzularni tilayman sizga.\n" +
-                "Tug’ilgan kuningiz bo’lsin muborak!"))
-        list.add(Poem("8-mart tabrik sher\n","Bahor gullaridan sizga guldasta,\n" +
+                "Tug’ilgan kuningiz bo’lsin muborak!",false))
+        list.add(Poem("8-mart tabrik sher","Bahor gullaridan sizga guldasta,\n" +
                 "Chin yurak so’zlarim unga payvasta.\n" +
                 "Bir asr yashangu yana nim chorak.\n" +
-                "8-mart ayyomingiz muborak!"))
+                "8-mart ayyomingiz muborak!",false))
         list.add(Poem("Hech qachon do’stlardan ketmasin ishonch","Yangi kun keltirsin baxt, omad, quvonch,\n" +
                 "Hech qachon do’stlardan ketmasin ishonch,\n" +
                 "Samimiy bo’lsin suhbatda so’zlar,\n" +
                 "Yoshlansa quvonchdan yoshlansin ko’zlar.\n" +
                 "Yaxshi so’z maqtovlar yangrasin doim,\n" +
-                "Omad yaqin do’stingiz bo’lsin, ilohim."))
+                "Omad yaqin do’stingiz bo’lsin, ilohim.",false))
 
     }
 
@@ -303,7 +307,7 @@ class SecondFragment : Fragment() {
                         "Tortishardik gohi tinmay bidirlashib,\n" +
                         "Baxtning daryosida suzib yurar edik.\n" +
                         "Shamoldek tez yillarimdan ogʻrinaman,\n" +
-                        "Sogʻinaman, bolaligim, sogʻinaman.")
+                        "Sogʻinaman, bolaligim, sogʻinaman.",false)
         )
         list.add(
             Poem(
@@ -311,12 +315,12 @@ class SecondFragment : Fragment() {
                         "Hayot yo'llarida birga ketmoqqa.\n" +
                         "Bugun esa mendan ketding uzoqqa\n" +
                         "Sog'inganim bilarmisan endi yor\n" +
-                        "Sog'indim deb kelarmisan ey dildor.")
+                        "Sog'indim deb kelarmisan ey dildor.",false)
         )
         list.add(Poem("Yana maktub, keraksiz qog'oz...","Yana maktub, keraksiz qog'oz,\n" +
                 "Qo'lingizda titrab turibdi.\n" +
                 "Yana ko'ngil tentirab bir oz,\n" +
-                "Mexringizni izlab yuribdi !"))
+                "Mexringizni izlab yuribdi !",false))
 
     }
 
@@ -326,36 +330,31 @@ class SecondFragment : Fragment() {
                 "Sizni qattiq sevgan yurak sizniki!", "Uyqusiz tunlarim qalbim sizniki,\n" +
                         "Ko’zimning yoshi ko’nglim sizniki,\n" +
                         "Shiring orzularim dardim sizniki,\n" +
-                        "Sizni qattiq sevgan yurak sizniki!")
+                        "Sizni qattiq sevgan yurak sizniki!",false)
         )
         list.add(Poem("O’lsam ham baribir sevaman seni!","Ko’zlarim ko’r bo’lsa, ko’rmasdim seni,\n" +
                 "Yuragim tosh bo’lsa, sevmasdim seni,\n" +
                 "Mayli xijron azobi qiynasin meni,\n" +
-                "O’lsam ham baribir sevaman seni!"))
+                "O’lsam ham baribir sevaman seni!",false))
         list.add(Poem("Hayotda ma’no yo’q yashashdan sensiz.","Kimgadur visolsan, kimgadur hijron.\n" +
                 "Kimgadur orzusan, kimgadur armon.\n" +
                 "Kimgadur bir umr, kimgadur bir on.\n" +
                 "Kimgadur tomchisan, kimgadur ummon.\n" +
                 "Kimgadur achchiqsan, kimgadur shirin.\n" +
                 "Hullas «MUHABBATSAN» dunyoda tensiz.\n" +
-                "Hayotda ma’no yo’q yashashdan sensiz."))
+                "Hayotda ma’no yo’q yashashdan sensiz.",false))
         list.add(Poem("SMS yozsangu, yozmasa yomon","Birovni sevsangu sevmasa yomon\n" +
                 "Kimnidir kutsangu kelmasa yomon.\n" +
                 "Hajrida yonsangu bilmasa yomon\n" +
-                "SMS yozsangu, yozmasa yomon."))
+                "SMS yozsangu, yozmasa yomon.",false))
         list.add(Poem("Men seni sevardim, sevaman hamon","Yo’q seni unitmoq emasdur oson.\n" +
                 "Qalbimni o’rtaydi hali ham hijron.\n" +
                 "Yurakda bir tuyg’u uradi hamon,\n" +
-                "Men seni sevardim, sevaman hamon"))
+                "Men seni sevardim, sevaman hamon",false))
         list.add(Poem("Sizni o’ylab-o’ylab bugun ham o’tdi","Tun cho’kib borliqni domiga yutdi.\n" +
                 "Kimdur meni eslab, kimdur unutdi.\n" +
                 "Yuragim eridi shirin tush kabi,\n" +
-                "Sizni o’ylab-o’ylab bugun ham o’tdi."))
-    }
-
-    private fun loadSaved() {
-        list = ArrayList()
-        list = MySharedPref.list
+                "Sizni o’ylab-o’ylab bugun ham o’tdi.",false))
     }
 
     private fun loadNews() {
@@ -364,18 +363,18 @@ class SecondFragment : Fragment() {
                 "Sizni qattiq sevgan yurak sizniki!", "Uyqusiz tunlarim qalbim sizniki,\n" +
                         "Ko’zimning yoshi ko’nglim sizniki,\n" +
                         "Shiring orzularim dardim sizniki,\n" +
-                        "Sizni qattiq sevgan yurak sizniki!")
+                        "Sizni qattiq sevgan yurak sizniki!",false)
         )
         list.add(Poem("O’lsam ham baribir sevaman seni!","Ko’zlarim ko’r bo’lsa, ko’rmasdim seni,\n" +
                 "Yuragim tosh bo’lsa, sevmasdim seni,\n" +
                 "Mayli xijron azobi qiynasin meni,\n" +
-                "O’lsam ham baribir sevaman seni!"))
+                "O’lsam ham baribir sevaman seni!",false))
         list.add(Poem(
-            "Har kuningiz o’tsin bayramday har on!\n","Baxor chechaklari bo’lsin armug’on,\n" +
+            "Har kuningiz o’tsin bayramday har on!","Baxor chechaklari bo’lsin armug’on,\n" +
                     "Siz nurli insonsiz baxtli begumon,\n" +
                     "Bayramla qutlayman bo’ling shodumon,\n" +
                     "Har kuningiz o’tsin bayramday har on!\n" +
-                    "Tug’ilgan kuningiz muborak bo’lsin!"))
+                    "Tug’ilgan kuningiz muborak bo’lsin!",false))
     }
 
     companion object {

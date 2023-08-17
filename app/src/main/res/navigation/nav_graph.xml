@@ -17,10 +17,22 @@
             app:exitAnim="@android:anim/fade_out"
             app:popEnterAnim="@android:anim/fade_in"
             app:popExitAnim="@android:anim/fade_out" />
+        <action
+            android:id="@+id/action_mainFragment_to_likedFragment"
+            app:destination="@id/likedFragment"
+            app:enterAnim="@android:anim/fade_in"
+            app:exitAnim="@android:anim/fade_out"
+            app:popEnterAnim="@android:anim/fade_in"
+            app:popExitAnim="@android:anim/fade_out" />
     </fragment>
     <fragment
         android:id="@+id/secondFragment"
         android:name="uz.frodo.sherlarsms.SecondFragment"
         android:label="fragment_second"
         tools:layout="@layout/fragment_second" />
+    <fragment
+        android:id="@+id/likedFragment"
+        android:name="uz.frodo.sherlarsms.LikedFragment"
+        android:label="fragment_liked"
+        tools:layout="@layout/fragment_liked" />
 </navigation>

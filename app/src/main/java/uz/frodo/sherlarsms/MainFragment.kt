@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import uz.frodo.sherlarsms.databinding.FragmentMainBinding
@@ -35,8 +36,8 @@ class MainFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        MySharedPref.init(this.requireContext())
+    ): View {
+        MySharedPref.init(requireContext())
         val binding = FragmentMainBinding.inflate(layoutInflater)
 
         binding.savedCount.text = MySharedPref.list.size.toString()
@@ -53,9 +54,8 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.secondFragment,bundle,options.build())
         }
         binding.cardSaved.setOnClickListener {
-            val bundle = Bundle()
-            bundle.putString("second","cardSaved")
-            findNavController().navigate(R.id.secondFragment,bundle,options.build())
+            val bundle = bundleOf("" to "")
+            findNavController().navigate(R.id.likedFragment,bundle,options.build())
         }
         binding.cardLove.setOnClickListener {
             val bundle = Bundle()

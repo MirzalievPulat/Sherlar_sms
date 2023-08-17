@@ -104,11 +104,12 @@
         app:layout_constraintStart_toEndOf="@+id/sms_dialog"
         app:layout_constraintTop_toTopOf="@+id/sms_dialog">
 
-        <ImageView
+        <CheckBox
+            android:id="@+id/heart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
-            android:src="@drawable/heart2"
+            android:button="@drawable/selector_heart"
+            app:useMaterialThemeColors="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
